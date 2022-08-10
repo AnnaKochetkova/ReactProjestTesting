@@ -6,6 +6,10 @@ Node version v17.8.0
 
 git clone git@github.com:AnnaKochetkova/ReactProjestTesting.git
 
+cd ReactProjestTesting
+
+npm install
+
 ## mode dev
 
 npm run dev
