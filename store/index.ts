@@ -1,5 +1,5 @@
 import { action, runInAction, makeObservable, observable} from "mobx";
-import client_api, { baseError } from "../utils/client_api";
+import client_api, { setCookie } from "../utils/client_api";
 import { navigate } from './navigate';
 import { snack } from "./snackbar";
 
@@ -14,39 +14,39 @@ export interface IUser {
     token_api: string;
 }
 
-interface IStore {
+export interface IStore {
     user: IUser | undefined; 
     contacts: IContacts[] | null
 }
 
 class MyStore {
-    // token: string | undefined;
     user: IUser | undefined = undefined;
     contacts: IContacts[] = [];
     constructor() {
         makeObservable(this,{
             contacts: observable,
+            user: observable,
             getContacts: action,
+            createContact: action,
+            deleteContact: action,
+            updateContact: action,
+            login: action,
+            hydrate: action,
         })
     }
 
     getContacts = async () => {
         try {
             const api = client_api('http://localhost:3004', this.user?.token_api as string);
-            const result = await api.contacts();
-            // const result = await api.contacts(token);        
+            const result = await api.contacts();     
             runInAction(() => {
                 this.contacts = result;
             })
         } catch (error) {
-
-                // navigate.push('/login', undefined, { shallow: true });
-                snack.enqueueSnackbar("you are not authorized", {
-                    variant: "error"
-                })
-
+            snack.enqueueSnackbar("you are not authorized", {
+                variant: "error"
+            })
         }
-        
     }
 
     createContact = async(name: string, phone: string) => {
@@ -94,11 +94,9 @@ class MyStore {
                 snack.enqueueSnackbar("login", {
                     variant: "success"
                 })
+                setCookie('accessToken', result.token_api, 2)
             })
         } catch (error) {
-            // const messageError = await error as baseError;
-            // console.log(snack, 'snack');
-            console.log('error', error);
             if (error instanceof Error) {
                 snack.enqueueSnackbar(error.message as string, {
                     variant: "error"
@@ -107,13 +105,11 @@ class MyStore {
                 snack.enqueueSnackbar("Something went wrong", {
                     variant: "error"
                 })
-            }
-            
-                        
+            }  
         }
     }
 
-    hydrate = (data: IStore) => {
+    hydrate = (data: Partial<IStore>) => {
         if (data.user) {
             this.user = data.user;
         }

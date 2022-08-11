@@ -1,4 +1,6 @@
 import { IContacts, IUser } from "../store";
+import cookie from "cookie";
+import { IncomingMessage } from "http";
 
 export type baseError = {
     error: string
@@ -18,6 +20,7 @@ const checkResponse = async(res: Response) => {
 
 interface IClientApiPublic {
     login: (name: string, password: string) => Promise<IUser>
+    currentUser: (token: string) => Promise<IUser>
 }
 
 interface IClientApiPrivate {
@@ -30,6 +33,8 @@ interface IClientApiPrivate {
 function clientApi(base_url: string) : IClientApiPublic;
 
 function clientApi(base_url: string, token: string) : IClientApiPrivate;
+
+
 
 function clientApi(
     base_url: string, token?: string
@@ -94,12 +99,37 @@ function clientApi(
         });
         return checkResponse(res);
     }
+
+    const currentUser = async(token: string): Promise<IUser> => {
+        const res = await fetch(`${baseUrl}/user/current` , {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"token_api": token})
+        });
+        return checkResponse(res);
+    }
     
     if (token !== undefined) {
         return {contacts, createContact, deleteContact, updateContact}
     } else {
-        return { login }
+        return { login, currentUser }
     }
+}
+
+export function setCookie( name: string, value: string, days: number ) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+export function parseCookies(req: IncomingMessage & { cookies: Partial<{ [key: string]: string; }>; }){
+    return cookie.parse(req ? req.headers.cookie || "" : document.cookie);
 }
 
 export default clientApi;

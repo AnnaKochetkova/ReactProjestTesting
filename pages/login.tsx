@@ -1,19 +1,14 @@
 import { Button, TextField } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { useRouter } from "next/router";
-import { useSnackbar } from "notistack";
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useState } from "react";
 import store from "../store";
 import styles from '../styles/login.module.css';
-import { baseError } from "../utils/client_api";
 
 const Login = observer(() => {
     const [values, setValues] = useState({
         name: '',
         password: '',
     })
-    const { enqueueSnackbar } = useSnackbar();
-    const router = useRouter()
 
     const onChangeForm = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         e.persist();
@@ -21,7 +16,7 @@ const Login = observer(() => {
             ...oldValues,
             [e.target.name]: e.target.value,
         }))
-    }, [values])
+    }, [])
 
     const onSubmitForm = useCallback(async(e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

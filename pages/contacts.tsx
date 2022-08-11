@@ -3,11 +3,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import styles from '../styles/contacts.module.css';
-import store, { IContacts } from "../store";
+import store, { IContacts, IStore, IUser } from "../store";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
+import client_api, { parseCookies } from "../utils/client_api";
+import { GetServerSideProps } from "next";
 
-const Contacts = observer(() => {
+const Contacts = observer((props: Partial<IStore>) => {
     const [values, setValues] = useState({
         name: '',
         phone: '',
@@ -23,6 +25,10 @@ const Contacts = observer(() => {
     const createContact = useCallback((e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         store.createContact(values.name, values.phone);
+        setValues({
+            name: '',
+            phone: ''
+        })
     }, [values]);
 
     const onClickEdit = (el: IContacts) => {
@@ -65,14 +71,14 @@ const Contacts = observer(() => {
     }
 
     useEffect(() => {
-        console.log(store.user, 'store user cont');
+        store.hydrate(props);
         if(store.user === undefined){
             router.push('/login', undefined, { shallow: true })
         } else {
             store.getContacts();  
         }
          
-    }, [router, store.user])
+    }, [router, props])
       
     return (
         <div className={styles.container}>
@@ -127,5 +133,21 @@ const Contacts = observer(() => {
         </div>
     )
 })
+
+export const getServerSideProps: GetServerSideProps = async({req}) => {
+    const cookies = parseCookies(req);
+    if(cookies.accessToken) {
+        const api = client_api('http://localhost:3004');
+        const result = await api.currentUser(cookies.accessToken);
+        console.log(result, 'result');
+        
+        return {
+            props: {user: result}
+        }
+    }
+    return {
+        props: {}
+    }
+}
 
 export default Contacts;

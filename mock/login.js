@@ -25,6 +25,17 @@ module.exports = (req, res, next) => {
                 })
             }
             break;
+        case '/user/current':
+            const {token_api} = req.body;
+            if(token_api === token) {
+                res.json({
+                    "token_api": token,
+                    "name": "name",
+                })
+            } else {
+                next();
+            }
+            break;
         default:
             next();
             break;
