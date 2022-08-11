@@ -1,26 +1,30 @@
-Требования:
+#  **Требования:**
 
 Node version v17.8.0
 
-Как запустить проект:
+# Как запустить проект:
 
 git clone git@github.com:AnnaKochetkova/ReactProjestTesting.git
 
-mode dev
+cd ReactProjestTesting
+
+npm install
+
+## mode dev
 
 npm run dev
 
-npm run run:server (в новом tab консоли)
+npm run run:server** (в новом tab консоли)**
 
-mode prod :
+## mode prod :
 
 npm run build
 
 npm run start
 
-npm run run:server (в новом tab консоли)
+npm run run:server** (в новом tab консоли)**
 
-Креды авторизации:
+# Креды авторизации:
 
 name
 qwe123
